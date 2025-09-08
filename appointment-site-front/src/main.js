@@ -24,7 +24,18 @@ import {
     faCartShopping,
     faTrash,
     faChevronLeft,
-    faChevronRight
+    faChevronRight,
+    faMoneyBillWave,
+    faMobileAlt,
+    faCut,
+    faPaintBrush,
+    faSpa,
+    faGem,
+    faHandSparkles,
+    faMagic,
+    faHandHoldingHeart,
+    faHeart,
+    faClock
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -33,7 +44,9 @@ import {
     faWhatsapp,
     faInstagram,
     faTwitter,
-    faTelegramPlane
+    faTelegramPlane,
+    faCcVisa,
+    faCcMastercard
 } from '@fortawesome/free-brands-svg-icons'
 
 library.add(
@@ -61,8 +74,19 @@ library.add(
     faTelegramPlane,
     faChevronLeft,
     faChevronRight,
-
-
+    faMoneyBillWave,
+    faMobileAlt,
+    faCcVisa,
+    faCcMastercard,
+    faCut,
+    faPaintBrush,
+    faSpa,
+    faGem,
+    faHandSparkles,
+    faMagic,
+    faHandHoldingHeart,
+    faHeart,
+    faClock
 )
 
 const app = createApp(App)

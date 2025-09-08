@@ -5,13 +5,25 @@ import {useRouter} from "vue-router";
 
 const HomeImages = ref([]);
 const currentIndex = ref(0);
+const services = ref();
 let slideInterval = null;
 
 async function getHomeHeaderImage() {
     try {
         const response = await api.get("accounts/home/images");
         HomeImages.value = response.data;
-        console.log(HomeImages.value);
+        // console.log(HomeImages.value);
+    } catch (error) {
+        console.error("خطا در دریافت اطلاعات", error);
+    }
+}
+
+async function getServices() {
+    try {
+        const response = await api.get("appointments/services/");
+        // فیلتر کردن سرویس‌هایی که show آنها true است
+        services.value = response.data.filter(service => service.show === true);
+        // console.log(services.value);
     } catch (error) {
         console.error("خطا در دریافت اطلاعات", error);
     }
@@ -62,8 +74,76 @@ watch(HomeImages, () => {
     }
 });
 
+// متد برای فرمت‌دهی به قیمت
+function formatPrice(price) {
+    return new Intl.NumberFormat('fa-IR', {
+        style: 'currency',
+        currency: 'IRR',
+        minimumFractionDigits: 0
+    }).format(price);
+}
+
+// متد برای فرمت‌دهی به مدت زمان
+function formatDuration(duration) {
+    if (!duration) return "نامشخص";
+
+    let hours = 0, minutes = 0;
+
+    // اگر رشته مثل "01:30:00" بود
+    if (typeof duration === "string") {
+        const parts = duration.split(":"); // ["01", "30", "00"]
+        hours = parseInt(parts[0], 10) || 0;
+        minutes = parseInt(parts[1], 10) || 0;
+    }
+    // اگر آبجکت بود
+    else if (typeof duration === "object") {
+        hours = duration.hours || 0;
+        minutes = duration.minutes || 0;
+    }
+
+    if (hours > 0 && minutes > 0) {
+        return `${hours} ساعت و ${minutes} دقیقه`;
+    } else if (hours > 0) {
+        return `${hours} ساعت`;
+    } else {
+        return `${minutes} دقیقه`;
+    }
+}
+
+
+// متد برای انتخاب آیکون مناسب بر اساس نام خدمت
+// متد برای انتخاب آیکون مناسب بر اساس نام خدمت
+function getServiceIcon(serviceName) {
+    const name = serviceName.toLowerCase();
+    if (name.includes("مو") || name.includes("کراتین") || name.includes("صافی")) {
+        return ["fas", "cut"];
+    } else if (name.includes("ابرو") || name.includes("میکرو")) {
+        return ["fas", "paint-brush"];
+    } else if (name.includes("پوست") || name.includes("فیشیال")) {
+        return ["fas", "spa"];
+    } else if (name.includes("مژه") || name.includes("کاشت")) {
+        return ["fas", "gem"];
+    } else if (name.includes("ناخن")) {
+        return ["fas", "hand-sparkles"];
+    } else if (name.includes("میکاپ") || name.includes("آرایش")) {
+        return ["fas", "magic"];
+    } else if (name.includes("ماساژ")) {
+        return ["fas", "hand-holding-heart"];
+    } else {
+        return ["fas", "star"];
+    }
+}
+
+
+// متد برای رزرو خدمت
+function bookService(service) {
+    console.log('رزرو خدمت:', service.name);
+    // اینجا می‌توانید کاربر را به صفحه رزرو هدایت کنید
+}
+
 onMounted(() => {
     getHomeHeaderImage();
+    getServices();
     startSlideShow();
 });
 
@@ -71,6 +151,7 @@ onUnmounted(() => {
     stopSlideShow();
 });
 </script>
+
 <template>
     <div class="home-header">
         <div class="home-header-box">
@@ -83,7 +164,6 @@ onUnmounted(() => {
                             <div class="badge">جدیدترین خدمات</div>
                             <h1>سالن آرایشی گلچین</h1>
                             <p>رزرو آسان به همراه بهترین خدمات آرایشی و زیبایی با بهترین متخصصان</p>
-
                             <div class="feature-list">
                                 <div class="feature-item">
                                     <div class="feature-icon">
@@ -104,7 +184,6 @@ onUnmounted(() => {
                                     <span>کاشت ابرو</span>
                                 </div>
                             </div>
-
                             <div class="action-buttons">
                                 <a href="/services" class="primary-btn">
                                     <i class="fas fa-spa"></i>
@@ -135,8 +214,6 @@ onUnmounted(() => {
                                 <div class="image-overlay"></div>
                             </div>
                         </div>
-
-                        <!-- دکمه‌های ناوبری -->
                         <!-- دکمه‌های ناوبری -->
                         <button class="nav-btn prev-btn" @click="prevSlide">
                             <font-awesome-icon :icon="['fas', 'chevron-right']"/>
@@ -144,7 +221,6 @@ onUnmounted(() => {
                         <button class="nav-btn next-btn" @click="nextSlide">
                             <font-awesome-icon :icon="['fas', 'chevron-left']"/>
                         </button>
-
                         <!-- نقاط اسلایدر -->
                         <div class="slider-dots">
                             <span
@@ -197,6 +273,108 @@ onUnmounted(() => {
                             <span>رضایت مشتری</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش خدمات -->
+    <div class="services">
+        <div class="services-box">
+            <div class="services-content">
+                <div class="section-header">
+                    <h2 class="section-title">خدمات سالن</h2>
+                    <p class="section-subtitle">تجربه‌ای لوکس با جدیدترین متدهای آرایشی و زیبایی</p>
+                </div>
+                <div class="services-grid" v-if="services && services.length > 0">
+                    <!-- کارت بزرگ -->
+                    <div class="service-card large" v-if="services[0]">
+                        <div class="service-icon">
+                            <font-awesome-icon :icon="getServiceIcon(services[0].name)"/>
+                        </div>
+                        <h3 class="service-title">{{ services[0].name }}</h3>
+                        <p class="service-description">{{ services[0].description }}</p>
+                        <div class="service-details">
+                            <div class="service-duration">
+                                <font-awesome-icon :icon="['fas', 'clock']"/>
+                                <span>{{ formatDuration(services[0].duration) }}</span>
+                            </div>
+                            <div class="service-price">{{ formatPrice(services[0].price) }}</div>
+                        </div>
+                        <button class="service-btn" @click="bookService(services[0])">رزرو کنید</button>
+                    </div>
+
+                    <!-- کارت متوسط -->
+                    <div class="service-card medium" v-if="services[1]">
+                        <span class="service-badge">پرفروش‌ترین</span>
+                        <div class="service-icon">
+                            <font-awesome-icon :icon="getServiceIcon(services[1].name)"/>
+                        </div>
+                        <h3 class="service-title">{{ services[1].name }}</h3>
+                        <p class="service-description">{{ services[1].description }}</p>
+                        <div class="service-details">
+                            <div class="service-duration">
+                                <font-awesome-icon :icon="['fas', 'clock']"/>
+                                <span>{{ formatDuration(services[1].duration) }}</span>
+                            </div>
+                            <div class="service-price">{{ formatPrice(services[1].price) }}</div>
+                        </div>
+                        <button class="service-btn" @click="bookService(services[1])">رزرو کنید</button>
+                    </div>
+
+                    <!-- کارت کوچک -->
+                    <div class="service-card small" v-if="services[2]">
+                        <div class="service-icon">
+                            <font-awesome-icon :icon="getServiceIcon(services[2].name)"/>
+                        </div>
+                        <h3 class="service-title">{{ services[2].name }}</h3>
+                        <p class="service-description">{{ services[2].description }}</p>
+                        <div class="service-details">
+                            <div class="service-duration">
+                                <font-awesome-icon :icon="['fas', 'clock']"/>
+                                <span>{{ formatDuration(services[2].duration) }}</span>
+                            </div>
+                            <div class="service-price">{{ formatPrice(services[2].price) }}</div>
+                        </div>
+                        <button class="service-btn" @click="bookService(services[2])">رزرو کنید</button>
+                    </div>
+
+                    <!-- کارت بلند -->
+                    <div class="service-card tall" v-if="services[3]">
+                        <div class="service-icon">
+                            <font-awesome-icon :icon="getServiceIcon(services[3].name)"/>
+                        </div>
+                        <h3 class="service-title">{{ services[3].name }}</h3>
+                        <p class="service-description">{{ services[3].description }}</p>
+                        <div class="service-details">
+                            <div class="service-duration">
+                                <font-awesome-icon :icon="['fas', 'clock']"/>
+                                <span>{{ formatDuration(services[3].duration) }}</span>
+                            </div>
+                            <div class="service-price">{{ formatPrice(services[3].price) }}</div>
+                        </div>
+                        <button class="service-btn" @click="bookService(services[3])">رزرو کنید</button>
+                    </div>
+
+                    <!-- کارت هم‌پوشان -->
+                    <div class="service-card overlay" v-if="services[4]">
+                        <div class="service-icon">
+                            <font-awesome-icon :icon="getServiceIcon(services[4].name)"/>
+                        </div>
+                        <h3 class="service-title">{{ services[4].name }}</h3>
+                        <p class="service-description">{{ services[4].description }}</p>
+                        <div class="service-details">
+                            <div class="service-duration">
+                                <font-awesome-icon :icon="['fas', 'clock']"/>
+                                <span>{{ formatDuration(services[4].duration) }}</span>
+                            </div>
+                            <div class="service-price">{{ formatPrice(services[4].price) }}</div>
+                        </div>
+                        <button class="service-btn" @click="bookService(services[4])">رزرو کنید</button>
+                    </div>
+                </div>
+                <div class="no-services" v-else>
+                    <p>در حال بارگذاری خدمات...</p>
                 </div>
             </div>
         </div>
@@ -623,6 +801,320 @@ p {
     font-weight: 500;
 }
 
+/* ===== استایل بخش خدمات ===== */
+.services {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.services-box {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.services-content {
+    position: relative;
+    z-index: 1;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+}
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    color: #ff1493;
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+    transform: rotate(-1deg);
+}
+
+.section-title::before {
+    content: 'خدمات';
+    position: absolute;
+    top: -15px;
+    right: -20px;
+    font-size: 1.8rem;
+    color: rgba(255, 20, 147, 0.2);
+    z-index: -1;
+}
+
+.section-subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    color: #d1006b;
+    max-width: 600px;
+    margin: 0 auto;
+    transform: rotate(0.5deg);
+}
+
+/* گرید نامنظم */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(100px, auto);
+    gap: 25px;
+    position: relative;
+}
+
+/* کارت‌های با اندازه‌های مختلف */
+.service-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #ff69b4, #ff1493);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s ease;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(255, 20, 147, 0.25);
+}
+
+/* اندازه‌های مختلف کارت‌ها */
+.service-card.large {
+    grid-column: span 2;
+    grid-row: span 2;
+    transform: rotate(-1deg);
+}
+
+.service-card.medium {
+    grid-column: span 2;
+    transform: rotate(0.5deg);
+}
+
+.service-card.small {
+    grid-column: span 1;
+    transform: rotate(-0.5deg);
+}
+
+.service-card.tall {
+    grid-row: span 2;
+}
+
+/* هم‌پوشانی کارت‌ها */
+.service-card.overlay {
+    position: absolute;
+    width: calc(50% - 40px);
+    bottom: -50px;
+    left: 25%;
+    z-index: 2;
+    transform: rotate(2deg);
+}
+
+.service-card.overlay:hover {
+    transform: rotate(2deg) translateY(-15px) scale(1.02);
+}
+
+/* آیکون‌های مدرن */
+/* آیکون‌های مدرن */
+.service-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    border-radius: 20px;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    color: #ff1493;
+    position: relative;
+}
+
+.service-icon::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 30px;
+    height: 30px;
+    background: #ff69b4;
+    border-radius: 50%;
+    opacity: 0.1;
+}
+
+.service-icon svg {
+    font-size: 1.8rem;
+    color: #ff1493;
+}
+
+.service-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.6rem;
+    color: #d1006b;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.service-description {
+    color: #d1006b;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.service-details {
+    margin-bottom: 20px;
+}
+
+.service-duration {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #d1006b;
+}
+
+.service-duration i {
+    color: #ff69b4;
+}
+
+.service-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #ff1493;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.service-price::before {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #ff69b4, #ff1493);
+}
+
+.service-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.service-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+}
+
+.service-btn:hover::before {
+    transform: translateX(0);
+}
+
+.service-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 20, 147, 0.3);
+}
+
+/* نشان ویژه */
+.service-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: #ff1493;
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transform: rotate(-3deg);
+    box-shadow: 0 4px 10px rgba(255, 20, 147, 0.3);
+}
+
+.no-services {
+    text-align: center;
+    padding: 40px;
+    color: #d1006b;
+    font-size: 1.2rem;
+}
+
+/* المان‌های دکوراتیو */
+.services::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 154, 158, 0.4) 0%, rgba(255, 154, 158, 0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.services::after {
+    content: '';
+    position: absolute;
+    bottom: 15%;
+    right: 8%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 20, 147, 0.3) 0%, rgba(255, 20, 147, 0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+/* انیمیشن‌ها */
+@keyframes float {
+    0% {
+        transform: translateY(0px) rotate(-1deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(-1deg);
+    }
+    100% {
+        transform: translateY(0px) rotate(-1deg);
+    }
+}
+
+.service-card.large {
+    animation: float 6s ease-in-out infinite;
+}
+
 /* ===== رسپانسیو ===== */
 @media (max-width: 992px) {
     .home-header-box {
@@ -655,6 +1147,31 @@ p {
     .primary-btn, .secondary-btn {
         width: 80%;
         justify-content: center;
+    }
+
+    .about-us-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .about-us-info {
+        order: 2;
+    }
+
+    .picture {
+        order: 1;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .service-card.overlay {
+        position: relative;
+        width: 100%;
+        bottom: auto;
+        left: auto;
+        transform: none;
     }
 }
 
@@ -690,6 +1207,32 @@ p {
         flex-direction: column;
         text-align: center;
         gap: 10px;
+    }
+
+    .about-us-box {
+        width: 90%;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .service-card.large,
+    .service-card.medium,
+    .service-card.small,
+    .service-card.tall {
+        grid-column: span 1;
+        grid-row: span 1;
+        transform: none !important;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        transform: none;
+    }
+
+    .section-subtitle {
+        transform: none;
     }
 }
 
@@ -782,6 +1325,28 @@ p {
 
     .icon-item span {
         font-size: 11px;
+    }
+
+    .services {
+        padding: 60px 0;
+    }
+
+    .service-card {
+        padding: 20px;
+    }
+
+    .service-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .service-title {
+        font-size: 1.3rem;
+    }
+
+    .service-price {
+        font-size: 1.5rem;
     }
 }
 </style>

@@ -82,18 +82,9 @@ onUnmounted(() => {
                     </router-link>
                 </div>
                 <div class="left-box">
-                    <form @submit.prevent="handleSearch">
-                        <div>
-                            <input
-                                type="search"
-                                id="search-input"
-                                placeholder="چست و جو..."
-                            />
-                            <button type="submit">
-                                <font-awesome-icon icon="search" class="search-icon"/>
-                            </button>
-                        </div>
-                    </form>
+                    <p class="title">
+                        <a href="/">هل<span class="white">چین</span></a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -228,9 +219,14 @@ onUnmounted(() => {
     background-color: #fff0f6;
 }
 
-.search-icon {
+.left-box .title a{
+    font-size: 2rem;
+    text-decoration: none;
     color: #db2777;
-    font-size: 16px;
+    font-weight: bolder;
+}
+.white{
+    color: black;
 }
 
 /* استایل ریسپانسیو */

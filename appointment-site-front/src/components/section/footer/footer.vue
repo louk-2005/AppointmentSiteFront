@@ -145,7 +145,7 @@ onMounted(async () => {
                 <p>© 2023 آرایشگاه زنانه زیبایی شما. تمامی حقوق محفوظ است.</p>
                 <p>طراحی شده با
                     <font-awesome-icon :icon="['fas', 'heart']" style="color: #d63384;"/>
-                    توسط تیم طراحی ما
+                    توسط تیم طراحی LoukWeb
                 </p>
                 <div class="payment-methods">
                     <font-awesome-icon :icon="['fab', 'cc-visa']" title="ویزا"/>
@@ -159,7 +159,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* استایل‌های اصلی فوتر */
 .footer {
     border-top: 1px solid #f8d7e0;
     padding: 60px 0 20px;
