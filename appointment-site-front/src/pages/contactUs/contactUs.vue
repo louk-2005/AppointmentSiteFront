@@ -58,7 +58,7 @@ function getBranchName(name) {
         case 'Head Office':
             return 'شعبه اصلی';
         case 'Other Branches':
-            return 'سایر شعب';
+            return 'سایر شعبه ها';
         default:
             return name;
     }
