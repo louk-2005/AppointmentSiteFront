@@ -1,18 +1,28 @@
 <script setup>
-import {ref, onMounted, onUnmounted, watch} from "vue";
+import {ref, onMounted, onUnmounted, watch, computed} from "vue";
 import api from "../../api/auth.js";
 import {useRouter} from "vue-router";
+import {useStore} from "vuex";
 
 const HomeImages = ref([]);
 const currentIndex = ref(0);
 const services = ref();
 let slideInterval = null;
 
+
+const store = useStore();
+
 async function getHomeHeaderImage() {
     try {
         const response = await api.get("accounts/home/images");
         HomeImages.value = response.data;
         // console.log(HomeImages.value);
+        const user = computed(() => store.getters.user);
+        const isAuthenticated = computed(() => store.getters.isAuthenticated);
+
+        console.log('Is authenticated:', isAuthenticated.value);
+        console.log('Logged-in user:', user.value);
+
     } catch (error) {
         console.error("خطا در دریافت اطلاعات", error);
     }

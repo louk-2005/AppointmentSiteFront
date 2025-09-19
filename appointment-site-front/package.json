@@ -14,9 +14,13 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/vue-fontawesome": "^3.1.1",
     "axios": "^1.11.0",
+    "jalali-date": "^1.2.0",
+    "jalali-moment": "^3.3.11",
     "leaflet": "^1.9.4",
+    "moment-jalaali": "^0.10.4",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",

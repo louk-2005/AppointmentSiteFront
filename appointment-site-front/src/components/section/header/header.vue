@@ -17,7 +17,7 @@ const navItems = [
     {name: 'خدمات', path: '/services'},
     {name: 'نوبت دهی آنلاین', path: '/booking'},
     {name: 'ارتباط با ما', path: '/contact'},
-    {name: 'ورود/ثبت نام', path: '/login'}
+    {name: 'ورود/ثبت نام', path: '/user'}
 ]
 
 // تابع کنترل نمایش هدر بر اساس اسکرول
